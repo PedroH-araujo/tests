@@ -100,3 +100,7 @@ What do we evaluate with this test?
     * Coding structure
     * Changes that don't break easily
 
+### Example
+
+![Peek 2025-10-06 19-55](https://github.com/user-attachments/assets/869f10df-873f-4c15-8270-23a25fd49038)
+
