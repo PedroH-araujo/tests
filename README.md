@@ -102,5 +102,145 @@ What do we evaluate with this test?
 
 ### Example
 
+### 🧪 Teste de Requisição com Thunder Client
+
+Após iniciar o servidor com o comando:
+
+```bash
+npm run start:dev
+```
+
+utilizei a extensão **Thunder Client** do VS Code para realizar um teste de requisição **POST** no endpoint:
+
+```
+http://localhost:8080/search
+```
+
+#### 🔸 Parâmetros utilizados
+
+Enviei o body com checkin e checkout:
+
+```
+{
+ "checkin": "2025-11-06", 
+ "checkout": "2025-11-08"
+}
+```
+
+#### 🔸 Resultado
+
+No inicio do teste, o servidor ainda não estava ativo no momento da requisição, resultando em:
+
+```
+Connection was refused by the server.
+```
+
+O GIF abaixo demonstra o processo de envio da requisição via Thunder Client, simulando o fluxo de teste da API em ambiente local:
+
 ![Peek 2025-10-06 19-55](https://github.com/user-attachments/assets/869f10df-873f-4c15-8270-23a25fd49038)
+
+# 🧪 Testes Automatizados — API `/search`
+
+Este projeto inclui uma suíte de testes automatizados para validar o comportamento da rota **POST `/search`**, responsável por buscar informações de quartos a partir de um intervalo de datas.
+
+Os testes foram implementados utilizando **Jest** e **Supertest**, garantindo a validação completa de regras de negócio, tratamento de erros e integração com o serviço de busca de quartos (`BrowserService`).
+
+---
+
+## 🚀 Executando os testes
+
+Para rodar todos os testes, basta utilizar o comando:
+
+```bash
+npm run test
+```
+
+Os testes são executados automaticamente com Jest, simulando requisições HTTP reais por meio do Supertest.
+
+---
+
+## 🧱 Estrutura dos testes
+
+O arquivo de testes principal está localizado em:
+
+```
+/tests/search.test.js
+```
+
+Ele importa o servidor e o serviço de busca para realizar mocks controlados durante os testes.
+
+```js
+const request = require('supertest');
+const app = require('../server');
+jest.mock('../services/BrowserService', () => ({ searchRooms: jest.fn() }));
+```
+
+---
+
+## 📋 Casos de teste cobertos
+
+| Caso                              | Descrição                                            | Resultado esperado                                                  |
+| --------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| **1️⃣ Body sem datas**            | Quando `checkin` e `checkout` não são enviados       | Retorna `400` e `{ error: 'checkin and checkout are required' }`    |
+| **2️⃣ Checkout antes do checkin** | Quando a data de saída é anterior à de entrada       | Retorna `400` e `{ error: 'checkout must be after checkin' }`       |
+| **3️⃣ Check-in no passado**       | Quando a data de entrada não é futura                | Retorna `400` e `{ error: 'checkin must be a future date' }`        |
+| **4️⃣ Estadia inferior a 2 dias** | Quando o intervalo é menor que duas diárias          | Retorna `400` e `{ error: 'a minimum stay of 2 days is required' }` |
+| **5️⃣ Falha no crawler**          | Quando o serviço de busca (`searchRooms`) lança erro | Retorna `500` e `{ error: 'failed to fetch rooms' }`                |
+| **6️⃣ Sucesso na busca**          | Quando o serviço retorna resultados válidos          | Retorna `200` e o array com os quartos encontrados                  |
+
+---
+
+## 🧩 Exemplo de mock usado nos testes
+
+O serviço `BrowserService` é simulado com dados fictícios para garantir que os testes não dependam de chamadas externas.
+
+```js
+const sampleRooms = [
+  {
+    name: "STUDIO CASAL",
+    description: "Apartamentos localizados no prédio principal do Resort...",
+    price: "R$ 1.092,00",
+    image: "https://s3.sa-east-1.amazonaws.com/fasthotel.cdn/quartosTipo/214-1-1632320429599483292-thumb.jpg"
+  },
+  {
+    name: "CABANA",
+    description: "Apartamentos espalhados pelos jardins do Resort...",
+    price: "R$ 1.321,00",
+    image: "https://s3.sa-east-1.amazonaws.com/fasthotel.cdn/quartosTipo/214-1-1632320429599483292-thumb.jpg"
+  }
+];
+```
+
+Durante o teste de sucesso:
+
+```js
+searchRooms.mockResolvedValue(sampleRooms);
+```
+
+---
+
+## ✅ Objetivo dos testes
+
+Os testes garantem que:
+
+* Todas as validações de entrada estão corretas.
+* Erros no serviço de busca são tratados adequadamente.
+* A resposta segue o formato esperado quando a busca é bem-sucedida.
+* O comportamento do servidor é previsível e estável diante de diferentes cenários.
+
+---
+
+## 🧠 Tecnologias utilizadas
+
+* **Node.js**
+* **Express**
+* **Jest**
+* **Supertest**
+
+### 💡 Observação
+
+Esses testes são baseados em mocks e validações de dados. Para testes de integração completos com o crawler real, é necessário remover o mock de `BrowserService` e executar o servidor conectado ao ambiente real.
+
+---
+
 
